@@ -14,37 +14,41 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class SignUpTest {
     BCryptPasswordEncoder encoder;
     UserException userException;
+
     public SignUpTest() {
         encoder = new BCryptPasswordEncoder();
     }
+
     @Autowired
     UserRepository userRepository;
     @Autowired
     AuthController authController;
+
     @Test
-    public void registerWithExistUsername(){
-        UserDto userDto = new UserDto("dang","123456789");
+    public void registerWithExistUsername() {
+        UserDto userDto = new UserDto("dang", "123456789");
         userException = (UserException) authController.register(userDto).getBody();
         Assertions.assertThat(userException.getMessages()).isEqualTo("Username was already taken!");
     }
 
     @Test
-    public void registerWithEmptyUsername(){
-        UserDto userDto = new UserDto("","123456789");
+    public void registerWithEmptyUsername() {
+        UserDto userDto = new UserDto("", "123456789");
         userException = (UserException) authController.register(userDto).getBody();
         Assertions.assertThat(userException.getMessages()).isEqualTo("Username is required");
     }
 
     @Test
-    public void registerWithInvalidPassword(){
-        UserDto userDto = new UserDto("god","god123");
+    public void registerWithInvalidPassword() {
+        UserDto userDto = new UserDto("god", "god123");
         userException = (UserException) authController.register(userDto).getBody();
-        Assertions.assertThat(userException.getMessages()).isEqualTo("Password's length must larger or equal 8 characters");
+        Assertions.assertThat(userException.getMessages())
+                .isEqualTo("Password's length must larger or equal 8 characters");
     }
 
     @Test
-    public void registerSucces(){
-        UserDto userDto = new UserDto("good","god1234567");
+    public void registerSucces() {
+        UserDto userDto = new UserDto("abc", "abc1234567");
         userException = (UserException) authController.register(userDto).getBody();
         Assertions.assertThat(userException.getMessages()).isEqualTo("Register Successfully!");
     }
