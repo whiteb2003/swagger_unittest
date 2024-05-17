@@ -64,7 +64,7 @@ public class AuthController {
         if (exist != null) {
             return ResponseEntity.status(400)
                     .body(new UserException(400, "REGISTER_ERROR", "Username was already taken!"));
-        } else if (userDto.getUsername() == null) {
+        } else if (userDto.getUsername().isBlank()) {
             return ResponseEntity.status(400).body(new UserException(400, "REGISTER_ERROR", "Username is required"));
         } else if (!pattern.matcher(userDto.getPassword()).matches()) {
             return ResponseEntity.status(400).body(
