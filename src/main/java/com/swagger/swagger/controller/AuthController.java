@@ -4,10 +4,15 @@ import java.util.regex.Pattern;
 
 import com.swagger.swagger.entity.UserEntity;
 import com.swagger.swagger.exception.UserException;
+import com.swagger.swagger.internationalization.MyLocalResolver;
 import com.swagger.swagger.jwt.JwtService;
 import com.swagger.swagger.repository.UserRepository;
 import com.swagger.swagger.service.CustomUserDetail;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,9 +41,13 @@ public class AuthController {
     AuthenticationManager authenticationManager;
     @Autowired
     JwtService jwtService;
+    @Autowired
+    private MessageSource messageSource;
+    @Autowired
+    private MyLocalResolver myLocalResolver;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDto userDto) {
+    public ResponseEntity<?> login(@RequestBody UserDto userDto, HttpServletRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(userDto.getUsername(),
@@ -48,30 +57,39 @@ public class AuthController {
             return ResponseEntity.status(200)
                     .body(new UserException(200, "LOGIN_SUCCESS", jwtService.generateToken(userDetails)));
         } catch (AuthenticationException ex) {
-            return ResponseEntity.status(400).body(new UserException(400, "LOGIN_ERROR", "Wrong Username or Password"));
+            return ResponseEntity.status(400).body(new UserException(400, "LOGIN_ERROR", messageSource
+                    .getMessage("Wrong_Username_or_Password", null,
+                            myLocalResolver.resolveLocale(request))));
         }
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> register(@RequestBody SignUpDto signUpDto) {
+    public ResponseEntity<?> register(@RequestBody SignUpDto signUpDto, HttpServletRequest request) {
         String passwordRegex = "^.{8,}$";
         Pattern pattern = Pattern.compile(passwordRegex);
         UserEntity userEntity = new UserEntity();
         UserEntity exist = userRepository.findByUsername(signUpDto.getUsername());
         if (exist != null) {
             return ResponseEntity.status(400)
-                    .body(new UserException(400, "REGISTER_ERROR", "Username was already taken!"));
+                    .body(new UserException(400, "REGISTER_ERROR", messageSource
+                            .getMessage("User_name_was_exist", null, myLocalResolver.resolveLocale(request))));
         } else if (signUpDto.getUsername() == null || signUpDto.getUsername().isBlank()) {
-            return ResponseEntity.status(400).body(new UserException(400, "REGISTER_ERROR", "Username is required"));
+            return ResponseEntity.status(400).body(new UserException(400, "REGISTER_ERROR", messageSource
+                    .getMessage("Username_is_required", null, myLocalResolver.resolveLocale(request))));
         } else if (signUpDto.getPassword() == null || !pattern.matcher(signUpDto.getPassword()).matches()) {
             return ResponseEntity.status(400).body(
-                    new UserException(400, "REGISTER_ERROR", "Password's length must larger or equal 8 characters"));
+                    new UserException(400, "REGISTER_ERROR", messageSource
+                            .getMessage("Password's_length_must_larger_or_equal_8_characters", null,
+                                    myLocalResolver.resolveLocale(request))));
         } else if (signUpDto.getConfirmPassword() == null || signUpDto.getConfirmPassword().isBlank()) {
             return ResponseEntity.status(400).body(
-                    new UserException(400, "REGISTER_ERROR", "Confirm password require"));
+                    new UserException(400, "REGISTER_ERROR", messageSource
+                            .getMessage("Confirm_password_require", null, myLocalResolver.resolveLocale(request))));
         } else if (!signUpDto.getConfirmPassword().equals(signUpDto.getPassword())) {
             return ResponseEntity.status(400).body(
-                    new UserException(400, "REGISTER_ERROR", "Confirm password was not same password"));
+                    new UserException(400, "REGISTER_ERROR", messageSource
+                            .getMessage("Confirm_password_was_not_same_password", null,
+                                    myLocalResolver.resolveLocale(request))));
         } else {
             userEntity.setEnabled(true);
             userEntity.setPassword(encoder.encode(signUpDto.getUsername() + signUpDto.getPassword()));
@@ -80,7 +98,8 @@ public class AuthController {
             userEntity.setRoles(null);
             userRepository.save(userEntity);
             return ResponseEntity.status(200)
-                    .body(new UserException(200, "REGISTER_SUCCESSFULLY", "Register Successfully!"));
+                    .body(new UserException(200, "REGISTER_SUCCESSFULLY", messageSource
+                            .getMessage("Register_Successfully", null, myLocalResolver.resolveLocale(request))));
         }
     }
 }
