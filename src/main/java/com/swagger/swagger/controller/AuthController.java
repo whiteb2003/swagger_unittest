@@ -64,9 +64,9 @@ public class AuthController {
         if (exist != null) {
             return ResponseEntity.status(400)
                     .body(new UserException(400, "REGISTER_ERROR", "Username was already taken!"));
-        } else if (userDto.getUsername().isBlank()) {
+        } else if (userDto.getUsername() == null || userDto.getUsername().isBlank()) {
             return ResponseEntity.status(400).body(new UserException(400, "REGISTER_ERROR", "Username is required"));
-        } else if (!pattern.matcher(userDto.getPassword()).matches()) {
+        } else if (userDto.getPassword() == null || !pattern.matcher(userDto.getPassword()).matches()) {
             return ResponseEntity.status(400).body(
                     new UserException(400, "REGISTER_ERROR", "Password's length must larger or equal 8 characters"));
         } else {
