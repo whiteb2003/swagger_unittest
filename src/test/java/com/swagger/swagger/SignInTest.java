@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -15,20 +16,23 @@ import org.springframework.boot.test.context.SpringBootTest;
 public class SignInTest {
     @Autowired
     AuthController authController;
+    @Autowired
     UserException userException;
-    HttpServletRequest request;
 
     @Test
     public void loginWithFail() {
-        UserDto userDto = new UserDto("", "123456789");
-        userException = (UserException) authController.login(userDto, request).getBody();
-        Assertions.assertThat(userException.getMessages()).isEqualTo("Wrong Username or Password");
+        UserDto userDto = new UserDto("ad", "123456789");
+        HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+        userException = (UserException) authController.login(userDto, mockRequest).getBody();
+        Assertions.assertThat(userException.getErrorCore()).isEqualTo("Wrong_Username_or_Password");
+
     }
 
     @Test
     public void loginSuccessful() {
         UserDto userDto = new UserDto("dang", "dang1234");
-        userException = (UserException) authController.login(userDto, request).getBody();
+        HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+        userException = (UserException) authController.login(userDto, mockRequest).getBody();
         Assertions.assertThat(userException.getErrorCode()).isEqualTo("LOGIN_SUCCESS");
     }
 }

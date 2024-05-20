@@ -6,9 +6,14 @@ import com.swagger.swagger.exception.UserException;
 import com.swagger.swagger.repository.UserRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+
+import java.util.Set;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,50 +32,61 @@ public class SignUpTest {
     @Autowired
     AuthController authController;
     @Autowired
-    HttpServletRequest request;
+    private Validator validator;
 
     @Test
     public void registerWithExistUsername() {
         SignUpDto userDto = new SignUpDto("dang", "123456789", "123456789");
-        userException = (UserException) authController.register(userDto, request).getBody();
-        Assertions.assertThat(userException.getMessages()).isEqualTo("Username was already taken!");
+        HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+        userException = (UserException) authController.register(userDto, mockRequest).getBody();
+        Assertions.assertThat(userException.getErrorCore()).isEqualTo("User_name_was_exist");
     }
 
     @Test
     public void registerWithEmptyUsername() {
         SignUpDto userDto = new SignUpDto("", "123456789", "123456789");
-        userException = (UserException) authController.register(userDto, request).getBody();
-        Assertions.assertThat(userException.getMessages()).isEqualTo("Username is required");
+        Set<ConstraintViolation<SignUpDto>> violations = validator.validate(userDto);
+        Assertions.assertThat(violations.iterator().next().getMessage()).isEqualTo("Username_is_required");
     }
 
     @Test
     public void registerWithEmptyPassword() {
         SignUpDto userDto = new SignUpDto("lam", "", "god12345");
-        userException = (UserException) authController.register(userDto, request).getBody();
-        Assertions.assertThat(userException.getMessages())
-                .isEqualTo("Password's length must larger or equal 8 characters");
+        Set<ConstraintViolation<SignUpDto>> violations = validator.validate(userDto);
+        Assertions.assertThat(violations.iterator().next().getMessage())
+                .isEqualTo("Password_is_required");
+    }
+
+    @Test
+    public void registerWithWrongLengthPassword() {
+        SignUpDto userDto = new SignUpDto("lam", "god123", "god12345");
+        Set<ConstraintViolation<SignUpDto>> violations = validator.validate(userDto);
+        Assertions.assertThat(violations.iterator().next().getMessage())
+                .isEqualTo("Password's_length_must_larger_or_equal_8_characters");
     }
 
     @Test
     public void registerWithEmptyConfirmPassword() {
         SignUpDto userDto = new SignUpDto("lam", "god12345", "");
-        userException = (UserException) authController.register(userDto, request).getBody();
-        Assertions.assertThat(userException.getMessages())
-                .isEqualTo("Confirm password require");
+        Set<ConstraintViolation<SignUpDto>> violations = validator.validate(userDto);
+        Assertions.assertThat(violations.iterator().next().getMessage())
+                .isEqualTo("Confirm_password_require");
     }
 
     @Test
     public void registerWithInvalidConfirmPassword() {
-        SignUpDto userDto = new SignUpDto("lam", "god12345", "god123456");
-        userException = (UserException) authController.register(userDto, request).getBody();
-        Assertions.assertThat(userException.getMessages())
-                .isEqualTo("Confirm password was not same password");
+        SignUpDto userDto = new SignUpDto("decao", "god12345", "god123456");
+        HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+        userException = (UserException) authController.register(userDto, mockRequest).getBody();
+        Assertions.assertThat(userException.getErrorCore())
+                .isEqualTo("Confirm_password_was_not_same_password");
     }
 
     @Test
     public void registerSucces() {
-        SignUpDto userDto = new SignUpDto("lam", "abc1234567", "abc1234567");
-        userException = (UserException) authController.register(userDto, request).getBody();
-        Assertions.assertThat(userException.getMessages()).isEqualTo("Register Successfully!");
+        SignUpDto userDto = new SignUpDto("decao", "abc1234567", "abc1234567");
+        HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+        userException = (UserException) authController.register(userDto, mockRequest).getBody();
+        Assertions.assertThat(userException.getErrorCore()).isEqualTo("Register_Successfully");
     }
 }

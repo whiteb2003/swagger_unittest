@@ -1,6 +1,6 @@
 package com.swagger.swagger.exception;
 
-import org.springframework.stereotype.Component;
+import java.util.Date;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,10 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-@Component
-public class UserException {
-    private Integer statusCode;
-    private String errorCode;
-    private String errorCore;
-    private String messages;
+public class AppException {
+    private String message;
+    private String stackTrace;
+    private Date time;
 }
