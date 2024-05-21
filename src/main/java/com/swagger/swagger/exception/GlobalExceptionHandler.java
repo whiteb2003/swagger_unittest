@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
         errorLog.setErrorStackTrace(errorDetail.getStackTrace());
         errorLog.setTimestamp(errorDetail.getTime());
         errorLogRepository.save(errorLog);
-        // sendMail.sendEmail("hoanghaido2003@gmail.com");
+        sendMail.sendEmail("hoanghaido2003@gmail.com");
         return new ResponseEntity<>(errorDetail, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
