@@ -37,7 +37,7 @@ public class SendMailImp implements SendMail {
         msg.setFrom(new InternetAddress("haihdhe170135@fpt.edu.vn", false));
 
         msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(mail));
-        msg.setSubject("Please verify your registration", "utf-8");
+        msg.setSubject("Check", "utf-8");
         msg.setContent(mailcontent, "text/html;charset=utf-8");
         Transport.send(msg);
     }
