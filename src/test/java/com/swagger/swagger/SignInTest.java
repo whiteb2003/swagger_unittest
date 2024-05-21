@@ -23,7 +23,7 @@ public class SignInTest {
     public void loginWithFail() {
         UserDto userDto = new UserDto("ad", "123456789");
         HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
-        userException = (UserException) authController.login(userDto, mockRequest).getBody();
+        userException = (UserException) authController.login(userDto, mockRequest).getData();
         Assertions.assertThat(userException.getErrorCore()).isEqualTo("Wrong_Username_or_Password");
 
     }
@@ -32,7 +32,7 @@ public class SignInTest {
     public void loginSuccessful() {
         UserDto userDto = new UserDto("dang", "dang1234");
         HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
-        userException = (UserException) authController.login(userDto, mockRequest).getBody();
+        userException = (UserException) authController.login(userDto, mockRequest).getData();
         Assertions.assertThat(userException.getErrorCode()).isEqualTo("LOGIN_SUCCESS");
     }
 }

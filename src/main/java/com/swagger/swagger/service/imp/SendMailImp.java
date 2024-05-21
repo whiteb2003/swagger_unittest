@@ -1,5 +1,6 @@
 package com.swagger.swagger.service.imp;
 
+import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -18,7 +19,7 @@ import com.swagger.swagger.service.SendMail;
 public class SendMailImp implements SendMail {
 
     @Override
-    public void sendEmail(String mail) throws MessagingException {
+    public void sendEmail(String mail, String message, String stack, Date date) throws MessagingException {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
@@ -32,6 +33,9 @@ public class SendMailImp implements SendMail {
         });
         String mailcontent = "<p> Dear admin" + ",</p>";
         mailcontent += "<h3> The application have error server!" + "</h3>";
+        mailcontent += "<div> Message" + message + "</div>";
+        mailcontent += "<div> Stack" + stack + "</div>";
+        mailcontent += "<div> Date" + date + "</div>";
         mailcontent += "<p>Thank you</p>";
         MimeMessage msg = new MimeMessage(session);
         msg.setFrom(new InternetAddress("haihdhe170135@fpt.edu.vn", false));

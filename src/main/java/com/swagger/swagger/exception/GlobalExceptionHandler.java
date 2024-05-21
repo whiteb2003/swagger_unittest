@@ -1,5 +1,6 @@
 package com.swagger.swagger.exception;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -20,49 +21,65 @@ import org.springframework.web.context.request.WebRequest;
 import com.swagger.swagger.entity.ErrorLog;
 import com.swagger.swagger.internationalization.MyLocalResolver;
 import com.swagger.swagger.repository.ErrorLogRepository;
+import com.swagger.swagger.response.BaseResponse;
 import com.swagger.swagger.service.SendMail;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    @Autowired
-    ErrorLogRepository errorLogRepository;
-    @Autowired
-    SendMail sendMail;
-    @Autowired
-    private MessageSource messageSource;
-    @Autowired
-    private MyLocalResolver myLocalResolver;
+        @Autowired
+        ErrorLogRepository errorLogRepository;
+        @Autowired
+        SendMail sendMail;
+        @Autowired
+        private MessageSource messageSource;
+        @Autowired
+        private MyLocalResolver myLocalResolver;
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<AppException> globleExcpetionHandler(Exception ex, WebRequest request)
-            throws MessagingException {
-        AppException errorDetail = new AppException(ex.getMessage(), Arrays.toString(ex.getStackTrace()),
-                new Date());
-        ErrorLog errorLog = new ErrorLog();
-        errorLog.setErrorMessage(errorDetail.getMessage());
-        errorLog.setErrorStackTrace(errorDetail.getStackTrace());
-        errorLog.setTimestamp(errorDetail.getTime());
-        errorLogRepository.save(errorLog);
-        sendMail.sendEmail("hoanghaido2003@gmail.com");
-        return new ResponseEntity<>(errorDetail, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<List<UserException>> customValidationErrorHanding(MethodArgumentNotValidException ex,
-            HttpServletRequest request) {
-        List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
-        List<UserException> errorDetails = new ArrayList<>();
-
-        for (FieldError fieldError : fieldErrors) {
-            // String field = fieldError.getField();
-            String message = fieldError.getDefaultMessage();
-            UserException error = new UserException(400, "REGISTER_ERROR", message, messageSource
-                    .getMessage(message, null,
-                            myLocalResolver.resolveLocale(request)));
-            errorDetails.add(error);
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<BaseResponse> globleExcpetionHandler(Exception ex, WebRequest request)
+                        throws MessagingException {
+                AppException errorDetail = new AppException(ex.getMessage(), Arrays.toString(ex.getStackTrace()),
+                                new Date());
+                ErrorLog errorLog = new ErrorLog();
+                errorLog.setErrorMessage(errorDetail.getMessage());
+                errorLog.setErrorStackTrace(errorDetail.getStackTrace());
+                errorLog.setTimestamp(errorDetail.getTime());
+                errorLogRepository.save(errorLog);
+                sendMail.sendEmail("hoanghaido2003@gmail.com", errorDetail.getMessage(), errorDetail.getStackTrace(),
+                                errorDetail.getTime());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                                BaseResponse.builder()
+                                                .code(9999999)
+                                                .message(ex.getMessage())
+                                                .data(errorDetail)
+                                                .timestamp(LocalDateTime.now())
+                                                .build());
+                // return new ResponseEntity<>(errorDetail, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return ResponseEntity.badRequest().body(errorDetails);
-    }
+
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<BaseResponse> customValidationErrorHanding(MethodArgumentNotValidException ex,
+                        HttpServletRequest request) {
+                List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
+                List<UserException> errorDetails = new ArrayList<>();
+
+                for (FieldError fieldError : fieldErrors) {
+                        // String field = fieldError.getField();
+                        String message = fieldError.getDefaultMessage();
+                        UserException error = new UserException(400, "REGISTER_ERROR", message, messageSource
+                                        .getMessage(message, null,
+                                                        myLocalResolver.resolveLocale(request)));
+                        errorDetails.add(error);
+                }
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                                BaseResponse.builder()
+                                                .code(9999999)
+                                                .message(ex.getMessage())
+                                                .data(errorDetails)
+                                                .timestamp(LocalDateTime.now())
+                                                .build());
+                // return ResponseEntity.badRequest().body(errorDetails);
+        }
 }

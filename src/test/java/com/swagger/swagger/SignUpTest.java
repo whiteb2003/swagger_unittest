@@ -38,7 +38,7 @@ public class SignUpTest {
     public void registerWithExistUsername() {
         SignUpDto userDto = new SignUpDto("dang", "123456789", "123456789");
         HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
-        userException = (UserException) authController.register(userDto, mockRequest).getBody();
+        userException = (UserException) authController.register(userDto, mockRequest).getData();
         Assertions.assertThat(userException.getErrorCore()).isEqualTo("User_name_was_exist");
     }
 
@@ -77,7 +77,7 @@ public class SignUpTest {
     public void registerWithInvalidConfirmPassword() {
         SignUpDto userDto = new SignUpDto("decao", "god12345", "god123456");
         HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
-        userException = (UserException) authController.register(userDto, mockRequest).getBody();
+        userException = (UserException) authController.register(userDto, mockRequest).getData();
         Assertions.assertThat(userException.getErrorCore())
                 .isEqualTo("Confirm_password_was_not_same_password");
     }
@@ -86,7 +86,7 @@ public class SignUpTest {
     public void registerSucces() {
         SignUpDto userDto = new SignUpDto("decao", "abc1234567", "abc1234567");
         HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
-        userException = (UserException) authController.register(userDto, mockRequest).getBody();
+        userException = (UserException) authController.register(userDto, mockRequest).getData();
         Assertions.assertThat(userException.getErrorCore()).isEqualTo("Register_Successfully");
     }
 }
