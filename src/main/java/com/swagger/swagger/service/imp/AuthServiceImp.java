@@ -44,7 +44,6 @@ public class AuthServiceImp implements AuthService {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(userDto.getUsername(),
                             userDto.getUsername() + userDto.getPassword()));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
             CustomUserDetail userDetails = (CustomUserDetail) authentication.getPrincipal();
             return new UserException(200, "LOGIN_SUCCESS", "Register_Successfully",
                     jwtService.generateToken(userDetails));
@@ -81,7 +80,8 @@ public class AuthServiceImp implements AuthService {
             userEntity.setVerificationCode(null);
             userEntity.setRoles(null);
             userRepository.save(userEntity);
-            return new UserException(200, "REGISTER_SUCCESSFULLY", "Register_Successfully",
+            return new UserException(200, "REGISTER_SUCCESSFULLY",
+                    "Register_Successfully",
                     messageSource.getMessage("Register_Successfully", null,
                             myLocalResolver.resolveLocale(
                                     request)));

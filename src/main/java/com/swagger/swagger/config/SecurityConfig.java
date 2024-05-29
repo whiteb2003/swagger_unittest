@@ -21,14 +21,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
+
     @Bean
-    public UserDetailsService userDetailsService(){
+    public UserDetailsService userDetailsService() {
         return new CustomUserDetailService();
     }
+
     @Bean
-    public static PasswordEncoder passwordEncoder(){
+    public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity https) throws Exception {
         https.cors(cors -> cors.disable());

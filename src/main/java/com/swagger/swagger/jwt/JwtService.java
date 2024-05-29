@@ -16,6 +16,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
 @Component
 public class JwtService {
     public String extractUsername(String token) {
@@ -30,6 +31,7 @@ public class JwtService {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
+
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
@@ -38,19 +40,23 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        return (username.equals(userDetails.getUsername()) &&
+                !isTokenExpired(token));
     }
-    public String generateToken(CustomUserDetail customUserDetail){
-        Map<String,Object> claims = new HashMap<>();
-        return createToken(claims,customUserDetail);
+
+    public String generateToken(CustomUserDetail customUserDetail) {
+        Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, customUserDetail);
     }
-    private String createToken(Map<String,Object> claims, CustomUserDetail customUserDetail){
+
+    private String createToken(Map<String, Object> claims, CustomUserDetail customUserDetail) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(customUserDetail.getUsername())
@@ -58,7 +64,8 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
-    private Key getSignKey(){
+
+    private Key getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SecretKey.SECRET);
         return Keys.hmacShaKeyFor(keyBytes);
     }

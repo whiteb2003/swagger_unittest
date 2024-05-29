@@ -13,17 +13,19 @@ import java.util.Set;
 
 public class CustomUserDetail implements UserDetails {
     private UserEntity user;
+
     public CustomUserDetail(UserEntity user) {
         this.user = user;
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<RoleEntity> roles = user.getRoles();
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        for(RoleEntity role : roles){
+        for (RoleEntity role : roles) {
             authorities.add(new SimpleGrantedAuthority(role.getName()));
         }
-    return authorities;
+        return authorities;
     }
 
     @Override

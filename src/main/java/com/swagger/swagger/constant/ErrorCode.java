@@ -1,13 +1,6 @@
 package com.swagger.swagger.constant;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
-
-import com.swagger.swagger.config.ApplicationContextHolder;
-import com.swagger.swagger.internationalization.MyLocalResolver;
-
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 
 /**
