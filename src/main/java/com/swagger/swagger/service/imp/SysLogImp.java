@@ -1,7 +1,11 @@
 package com.swagger.swagger.service.imp;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,13 +22,36 @@ public class SysLogImp implements SysLogService {
 
     @Override
     public List<SysLogDateDto> getAll(LogRequest logRequest) {
-        List<Object[]> results = logRepository.getAll(logRequest.getStartDate(), logRequest.getEndDate(),
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM");
+        List<String> months = new ArrayList<>();
+
+        LocalDate start = LocalDate.parse(logRequest.getStartDate() + "-01", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        LocalDate end = LocalDate.parse(logRequest.getEndDate() + "-01", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+        while (!start.isAfter(end)) {
+            months.add(start.format(formatter));
+            start = start.plusMonths(1);
+        }
+
+        List<Object[]> rawData = logRepository.getAll(logRequest.getStartDate(), logRequest.getEndDate(),
                 logRequest.getMethod());
+
+        Map<String, Long> dataMap = rawData.stream()
+                .collect(Collectors.toMap(
+                        row -> (String) row[0],
+                        row -> ((Number) row[1]).longValue()));
+        List<Object[]> results = new ArrayList<>();
+        for (String month : months) {
+            Long count = dataMap.getOrDefault(month, null);
+            results.add(new Object[] { month, count });
+        }
+
         List<SysLogDateDto> list = new ArrayList<>();
         for (Object[] result : results) {
             String month = (String) result[0];
-            int count = (int) result[1];
-            SysLogDateDto sysLogDateDto = new SysLogDateDto(month, count);
+            Long count = (Long) result[1];
+            int countValue = (count == null) ? 0 : count.intValue();
+            SysLogDateDto sysLogDateDto = new SysLogDateDto(month, countValue);
             list.add(sysLogDateDto);
         }
         return list;
