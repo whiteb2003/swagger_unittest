@@ -3,6 +3,7 @@ package com.swagger.swagger.service.imp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,10 +37,10 @@ public class SysLogImp implements SysLogService {
         List<Object[]> rawData = logRepository.getAll(logRequest.getStartDate(), logRequest.getEndDate(),
                 logRequest.getMethod());
 
-        Map<String, Long> dataMap = rawData.stream()
-                .collect(Collectors.toMap(
-                        row -> (String) row[0],
-                        row -> ((Number) row[1]).longValue()));
+        Map<String, Long> dataMap = new HashMap<String, Long>();
+        for (Object[] result : rawData) {
+            dataMap.put((String) result[0], ((Number) result[1]).longValue());
+        }
         List<Object[]> results = new ArrayList<>();
         for (String month : months) {
             Long count = dataMap.getOrDefault(month, null);
