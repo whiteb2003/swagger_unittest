@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SysLogDateDto {
     private String date;
-    private int count;
+    private Long count;
 }

@@ -48,7 +48,7 @@ public class SysLogRepository {
         public SysLogDateDto mapRow(ResultSet rs, int rowNum) throws SQLException {
             SysLogDateDto log = new SysLogDateDto();
             log.setDate(rs.getString("month"));
-            log.setCount(rs.getInt("count"));
+            log.setCount(rs.getLong("count"));
             return log;
         }
     }
