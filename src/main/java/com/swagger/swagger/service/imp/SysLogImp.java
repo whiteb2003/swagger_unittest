@@ -9,8 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.swagger.swagger.dto.SysLogDetail;
+import com.swagger.swagger.dto.SysLogSummaryProjection;
+import com.swagger.swagger.repository.LogRepositoryPaging;
 import com.swagger.swagger.request.DeleteLogRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.swagger.swagger.dto.SysLogDateDto;
@@ -22,7 +28,8 @@ import com.swagger.swagger.service.SysLogService;
 public class SysLogImp implements SysLogService {
     @Autowired
     LogRepository logRepository;
-
+    @Autowired
+    LogRepositoryPaging logRepositoryPaging;
     @Override
     public List<SysLogDateDto> getAll(LogRequest logRequest) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
@@ -63,7 +70,6 @@ public class SysLogImp implements SysLogService {
             SysLogDateDto sysLogDateDto = new SysLogDateDto(month, countValue);
             list.add(sysLogDateDto);
         }
-
         return list;
     }
 
@@ -100,6 +106,18 @@ public class SysLogImp implements SysLogService {
             results.add(new Object[] { month, count });
         }
         return results;
+    }
+
+    @Override
+    public Page<SysLogSummaryProjection> getByDateAndElement(String startDate, String endDate, String method, String classes, String httpmethod, int page) {
+        Pageable pageable = PageRequest.of(page-1,5);
+        return logRepositoryPaging.getByDateAndElement(startDate,endDate,method,classes,httpmethod,pageable);
+    }
+
+    @Override
+    public Page<SysLogDetail> getByElement(String method, String classes, String httpmethod, int page) {
+        Pageable pageable = PageRequest.of(page-1,5);
+        return logRepositoryPaging.getByElement(method,classes,httpmethod,pageable);
     }
 
 }
