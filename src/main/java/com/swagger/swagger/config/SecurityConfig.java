@@ -34,13 +34,15 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity https) throws Exception {
-        https.cors(cors -> cors.disable());
         https.httpBasic((basic) -> basic.disable());
         https.csrf(csrf -> csrf.disable());
         https.authorizeHttpRequests(request -> request
                 .requestMatchers("/*").permitAll()
                 .requestMatchers("/login").permitAll()
                 .requestMatchers("/signup").permitAll()
+                .requestMatchers("/logs/page/**").permitAll()
+                .requestMatchers("/logs/pageElement/**").permitAll()
+                .requestMatchers("/download/**").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/api-docs").permitAll()
                 .requestMatchers("/v3/api-docs/swagger-config").permitAll()

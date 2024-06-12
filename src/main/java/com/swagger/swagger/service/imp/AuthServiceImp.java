@@ -73,12 +73,9 @@ public class AuthServiceImp implements AuthService {
                                             request)));
         } else {
             UserEntity userEntity = new UserEntity();
-            userEntity.setEnabled(true);
             userEntity.setPassword(encoder.encode(signUpDto.getUsername() +
                     signUpDto.getPassword()));
             userEntity.setUsername(signUpDto.getUsername());
-            userEntity.setVerificationCode(null);
-            userEntity.setRoles(null);
             userRepository.save(userEntity);
             return new UserException(200, "REGISTER_SUCCESSFULLY",
                     "Register_Successfully",

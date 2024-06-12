@@ -73,13 +73,10 @@ public class GlobalExceptionHandler {
                                                         myLocalResolver.resolveLocale(request)));
                         errorDetails.add(error);
                 }
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                                 BaseResponse.builder()
                                                 .code(9999999)
-                                                .message(ex.getMessage())
-                                                .data(errorDetails)
-                                                .timestamp(LocalDateTime.now())
+                                                 .data(errorDetails)
                                                 .build());
-                // return ResponseEntity.badRequest().body(errorDetails);
         }
 }

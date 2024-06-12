@@ -50,8 +50,10 @@ public interface LogRepository extends JpaRepository<SysLogs, Long> {
             "WHERE CreatedTime BETWEEN :startDate  and :endDate  " +
             " GROUP BY FORMAT([CreatedTime], 'yyyy-MM') " +
             " ORDER BY [date]", nativeQuery = true)
-    public List<SysLogSummaryProjection> getByProjection(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    public List<SysLogSummaryProjection> getByProjection(@Param("startDate") String startDate, @Param("endDate") String endDate);
 
     @Query(name = "SysLog.countByDateRangeAndMethod", nativeQuery = true)
     public List<SysLogDateDto> getBySetMapping(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+
 }
