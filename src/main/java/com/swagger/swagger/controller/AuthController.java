@@ -1,5 +1,6 @@
 package com.swagger.swagger.controller;
 
+import com.swagger.swagger.dto.JwtTokenBlackList;
 import com.swagger.swagger.exception.UserException;
 import com.swagger.swagger.jwt.JwtService;
 import com.swagger.swagger.repository.UserRepository;
@@ -39,6 +40,8 @@ public class AuthController {
     JwtService jwtService;
     @Autowired
     private AuthService authService;
+    @Autowired
+    private JwtTokenBlackList jwtTokenBlacklist;
 
     @PostMapping("/login")
     public ResponseEntity<BaseResponse> login(@Valid @RequestBody UserDto userDto,
@@ -68,6 +71,17 @@ public class AuthController {
         return BaseResponse.builder()
                 .data(username)
                 .build();
+    }
+
+    @PostMapping("/signout")
+    public ResponseEntity<?> logout() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String jwt = (String) authentication.getCredentials();  // Lấy JWT từ Authentication object
+        jwtTokenBlacklist.blacklistToken(jwt);
+        System.out.println("a" +  jwt);
+        SecurityContextHolder.clearContext();  // Xóa SecurityContext
+
+        return ResponseEntity.ok("Logout successful");
     }
 
 }

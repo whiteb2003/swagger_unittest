@@ -1,5 +1,6 @@
 package com.swagger.swagger.jwt;
 
+import com.swagger.swagger.repository.TokenRepository;
 import com.swagger.swagger.secret.SecretKey;
 import com.swagger.swagger.service.CustomUserDetail;
 import io.jsonwebtoken.Claims;
@@ -7,6 +8,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +22,8 @@ import java.util.Map;
 
 @Component
 public class JwtService {
+    @Autowired
+    TokenRepository tokenRepository;
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }

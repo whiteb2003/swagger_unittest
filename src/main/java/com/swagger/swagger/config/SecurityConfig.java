@@ -1,7 +1,13 @@
 package com.swagger.swagger.config;
 
+import com.swagger.swagger.dto.JwtTokenBlackList;
 import com.swagger.swagger.jwt.JwtFilter;
+import com.swagger.swagger.jwt.JwtService;
 import com.swagger.swagger.service.CustomUserDetailService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +22,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
 
 @Configuration
 public class SecurityConfig {
@@ -34,18 +43,19 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity https) throws Exception {
-        https.httpBasic((basic) -> basic.disable());
         https.csrf(csrf -> csrf.disable());
         https.authorizeHttpRequests(request -> request
                 .requestMatchers("/*").permitAll()
                 .requestMatchers("/login").permitAll()
                 .requestMatchers("/signup").permitAll()
+                .requestMatchers("/logout").permitAll()
                 .requestMatchers("/logs/page/**").permitAll()
                 .requestMatchers("/logs/pageElement/**").permitAll()
                 .requestMatchers("/download/**").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/api-docs").permitAll()
                 .requestMatchers("/v3/api-docs/swagger-config").permitAll()
+                .requestMatchers("/logs").authenticated()
                 .anyRequest().authenticated());
         https.sessionManagement((session) -> {
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -69,4 +79,5 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
+
 }

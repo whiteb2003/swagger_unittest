@@ -1,9 +1,6 @@
 package com.swagger.swagger.entity;
 
-import java.util.List;
-
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,17 +9,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "UserEntity")
-
-public class UserEntity {
+@Table(name = "token")
+public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
-    @NotNull
-    private String username;
-    @NotNull
-    private String password;
 
-    @OneToMany(mappedBy = "user")
-    private List<Token> tokens;
+    @Column(name = "token")
+    private String token;
+
+    @Column(name = "is_logged_out")
+    private boolean loggedOut;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 }

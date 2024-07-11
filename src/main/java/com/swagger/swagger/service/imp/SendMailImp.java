@@ -37,12 +37,38 @@ public class SendMailImp implements SendMail {
         mailcontent += "<div> Stack" + stack + "</div>";
         mailcontent += "<div> Date" + date + "</div>";
         mailcontent += "<p>Thank you</p>";
+
         MimeMessage msg = new MimeMessage(session);
         msg.setFrom(new InternetAddress("haihdhe170135@fpt.edu.vn", false));
-
         msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(mail));
         msg.setSubject("Check", "utf-8");
         msg.setContent(mailcontent, "text/html;charset=utf-8");
+        Transport.send(msg);
+    }
+
+    @Override
+    public void sendEmail2(String mail, String subject, String content, Date date) throws MessagingException {
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication("haihdhe170135@fpt.edu.vn", "megftjteypnebxdr");
+            }
+        });
+
+        String mailContent = "<p> Dear admin,</p>";
+        mailContent += content;
+        mailContent += "<p>Thank you</p>";
+
+        MimeMessage msg = new MimeMessage(session);
+        msg.setFrom(new InternetAddress("haihdhe170135@fpt.edu.vn", false));
+        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(mail));
+        msg.setSubject(subject, "utf-8");
+        msg.setContent(mailContent, "text/html;charset=utf-8");
         Transport.send(msg);
     }
 

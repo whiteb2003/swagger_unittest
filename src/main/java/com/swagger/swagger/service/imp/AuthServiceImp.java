@@ -1,5 +1,7 @@
 package com.swagger.swagger.service.imp;
 
+import com.swagger.swagger.entity.Token;
+import com.swagger.swagger.repository.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,9 @@ import com.swagger.swagger.service.AuthService;
 import com.swagger.swagger.service.CustomUserDetail;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class AuthServiceImp implements AuthService {
@@ -35,26 +40,49 @@ public class AuthServiceImp implements AuthService {
     private MyLocalResolver myLocalResolver;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    TokenRepository tokenRepository;
 
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
+    @Transactional
     @Override
     public UserException auth(UserDto userDto, HttpServletRequest request) {
-        try {
+//        try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(userDto.getUsername(),
                             userDto.getUsername() + userDto.getPassword()));
             CustomUserDetail userDetails = (CustomUserDetail) authentication.getPrincipal();
-            return new UserException(200, "LOGIN_SUCCESS", "Register_Successfully",
-                    jwtService.generateToken(userDetails));
-        } catch (AuthenticationException ex) {
-            return new UserException(400, "LOGIN_ERROR",
-                    "Wrong_Username_or_Password", messageSource
-                            .getMessage("Wrong_Username_or_Password", null,
-                                    myLocalResolver.resolveLocale(request)));
-        }
-    }
+            UserEntity userEntity = userRepository.findByUsername(userDetails.getUsername());
+            String token = jwtService.generateToken(userDetails);
+            
 
+            return new UserException(200, "LOGIN_SUCCESS", "Register_Successfully",
+                    token);
+//        } catch (AuthenticationException ex) {
+//            return new UserException(400, "LOGIN_ERROR",
+//                    "Wrong_Username_or_Password", messageSource
+//                            .getMessage("Wrong_Username_or_Password", null,
+//                                    myLocalResolver.resolveLocale(request)));
+//        }
+    }
+    private void revokeAllTokenByUser(UserEntity user) {
+        List<Token> validTokens = tokenRepository.findByUserId(Long.valueOf(user.getId()));
+        if(validTokens.isEmpty()) {
+            return;
+        }
+        validTokens.forEach(t-> {
+            t.setLoggedOut(true);
+        });
+        tokenRepository.saveAll(validTokens);
+    }
+    private void saveUserToken(String accessToken, UserEntity user) {
+        Token token = new Token();
+        token.setToken(accessToken);
+        token.setLoggedOut(false);
+        token.setUser(user);
+        tokenRepository.save(token);
+    }
     @Override
     public UserException register(SignUpDto signUpDto, HttpServletRequest request) {
         UserEntity exist = userRepository.findByUsername(signUpDto.getUsername());

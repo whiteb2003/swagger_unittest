@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.mail.MessagingException;
 
+import com.swagger.swagger.service.ExceptionTrackingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -36,19 +37,22 @@ public class GlobalExceptionHandler {
         private MessageSource messageSource;
         @Autowired
         private MyLocalResolver myLocalResolver;
-
+        @Autowired
+        private ExceptionTrackingService exceptionTrackingService;
         @ExceptionHandler(Exception.class)
         public ResponseEntity<BaseResponse> globleExcpetionHandler(Exception ex, WebRequest request)
                         throws MessagingException {
                 AppException errorDetail = new AppException(ex.getMessage(), Arrays.toString(ex.getStackTrace()),
                                 new Date());
+                exceptionTrackingService.logException(errorDetail);
+
                 ErrorLog errorLog = new ErrorLog();
                 errorLog.setErrorMessage(errorDetail.getMessage());
                 errorLog.setErrorStackTrace(errorDetail.getStackTrace());
                 errorLog.setTimestamp(errorDetail.getTime());
                 errorLogRepository.save(errorLog);
-                sendMail.sendEmail("hoanghaido2003@gmail.com", errorDetail.getMessage(), errorDetail.getStackTrace(),
-                                errorDetail.getTime());
+//                sendMail.sendEmail("hoanghaido2003@gmail.com", errorDetail.getMessage(), errorDetail.getStackTrace(),
+//                                errorDetail.getTime());
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                                 BaseResponse.builder()
                                                 .code(9999999)
@@ -56,7 +60,6 @@ public class GlobalExceptionHandler {
                                                 .data(errorDetail)
                                                 .timestamp(LocalDateTime.now())
                                                 .build());
-                // return new ResponseEntity<>(errorDetail, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         @ExceptionHandler(MethodArgumentNotValidException.class)
